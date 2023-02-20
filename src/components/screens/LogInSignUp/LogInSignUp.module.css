@@ -1,0 +1,18 @@
+.form{
+    width: 480px;
+    margin: auto;
+}
+
+
+.label{
+    font-size: 1rem;
+    height: 20px;
+    text-align: left;
+    display: inline;
+}
+
+.leftAlign {
+    width: 100%;
+    text-align: left;
+}
+

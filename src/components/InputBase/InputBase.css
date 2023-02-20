@@ -1,0 +1,43 @@
+label {
+    height: auto;
+    display: block;
+    position: relative;
+    margin-bottom: 1rem;
+    text-align: left;
+    
+  
+}
+
+
+.icon {
+    position: absolute;
+    top: 2.125rem;
+    right: 2rem;
+    background-color: transparent;
+    z-index: 100;
+}
+
+.label{
+    background: transparent;
+    font-size: 12px;
+    height: 20px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    z-index: -1;
+    
+}
+.input-root {
+    border: 1px solid rgb(162, 159, 159);
+    border-radius: 5px;
+    padding: 10px;
+    line-height: 1.2;
+    width: 480px;
+    position: sticky;
+    
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+}

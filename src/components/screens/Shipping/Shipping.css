@@ -1,0 +1,77 @@
+.shipping-wrapper{
+    font-size: 1rem;
+}
+span{
+    position:sticky;
+}
+
+select{
+    border: 1px solid rgb(162, 159, 159);
+    border-radius: 5px;
+    width: 100px;
+    height: 2rem;
+   margin-left: 25px;
+}
+
+.shippingForm{
+    padding: 25px;
+    height: auto;
+    min-height: 80vh;
+    box-shadow: 1px 1px 9px 0.5px gray; 
+    font-size: 1rem;
+    display: flex;
+    height: 100%;
+    gap: 20px;
+    
+}
+
+.shippingInfo,
+.summary {
+   
+    padding: 25px;
+    box-shadow: 1px 1px 10px 0.25px lightgrey;
+    border-radius: 8px;
+    min-height: 80vh;
+    height: auto;
+}
+
+.summary {
+    flex: 25%;
+}
+.shipping-info
+{
+    flex: 75%;
+}
+
+.shipping-info-wrapper{
+    margin-top: 25px;
+    text-align: left;
+    padding: 30px;
+    box-shadow: 1px 1px 10px 0.25px lightgrey;
+    min-height: 80vh;
+}
+
+.shipping-summary-wrapper {
+    position: relative;
+   
+    min-height: 100px;
+   
+}
+
+.shipping-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    position: absolute;
+    left: 0;
+}
+
+.options-wrapper{
+    margin: 50px 0;
+}
+
+.individual-total {
+    position: absolute;
+    top: 80%;
+    right: 0;
+}
