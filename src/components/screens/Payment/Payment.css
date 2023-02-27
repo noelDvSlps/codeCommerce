@@ -1,22 +1,23 @@
-.shipping-wrapper{
+.payment-wrapper{
     font-size: 1rem;
 }
 span{
     position:sticky;
 }
 
-.select-shipment{
+select{
     border: 1px solid rgb(162, 159, 159);
     border-radius: 5px;
-    width: 105px;
+    width: 100px;
     height: 2rem;
-   margin-left: 150px;
+   margin-left: 25px;
 }
 
-.shippingForm{
+.paymentForm{
     padding: 25px;
     height: auto;
     min-height: 80vh;
+    /* box-shadow: 1px 1px 9px 0.5px gray;  */
     font-size: 1rem;
     display: flex;
     height: 100%;
@@ -24,9 +25,8 @@ span{
     
 }
 
-.shipping-info,
+.payment-info,
 .summary {
-   
     padding: 25px;
     box-shadow: 1px 1px 10px 0.25px lightgrey;
     border-radius: 8px;
@@ -37,12 +37,12 @@ span{
 .summary {
     flex: 25%;
 }
-.shipping-info
+.payment-info
 {
     flex: 75%;
 }
 
-.shipping-info-wrapper{
+.payment-info-wrapper{
     margin-top: 25px;
     text-align: left;
     padding: 30px;
@@ -50,14 +50,14 @@ span{
     min-height: 80vh;
 }
 
-.shipping-summary-wrapper {
+.payment-summary-wrapper {
     position: relative;
    
     min-height: 100px;
    
 }
 
-.shipping-image {
+.payment-image {
     width: 50px;
     height: 50px;
     object-fit: cover;

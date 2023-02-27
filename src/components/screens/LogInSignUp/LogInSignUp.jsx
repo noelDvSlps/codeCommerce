@@ -1,6 +1,4 @@
 import React from "react";
-
-
 import "../../../../src/index.css"
 import InputBase from "../../InputBase/InputBase";
 import styles from "./LogInSignUp.module.css";
@@ -9,15 +7,19 @@ import {
   onlyTextValidation,
   passwordValidation,
   confirmPasswordValidation,
-  postCodeValidation,
+  onlyNumberValidation,
 } from "../../validations";
 
 import {
  keyGenerator
 } from "../../keyGenerator";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {faFacebook} from "@fortawesome/free-brands-svg-icons"
+
+
 class LogInSignUp extends React.Component {
-  constructor() {
+  constructor(props) {
     super();
     this.state = {
       screen: "signUp",
@@ -30,7 +32,7 @@ class LogInSignUp extends React.Component {
         lastName: "",
         postCode: "",
       },
-      userSavedData: { noel:{email: "noel@gmail.com", password: "noelnoel"}},
+      userDatabase: props.userDatabase,
     };
   }
 
@@ -100,11 +102,13 @@ class LogInSignUp extends React.Component {
  
   searchIfEmailExists = (email) => {
     let isEmailExist = false;
-    let myObject = this.state.userSavedData;
+    // let myObject = this.state.userSavedData;
+    let myObject = this.state.userDatabase;
+    
     if (JSON.stringify(myObject) !== "{}") {
       Object.keys(myObject).forEach((val) => {
         let user = myObject[val];
-        if (user["email"] === email) {
+        if ((user["email"]).toLowerCase() === email.toLowerCase()) {
           isEmailExist = true;
         }
       });
@@ -115,55 +119,77 @@ class LogInSignUp extends React.Component {
   handleButtonSignUp = (e) => {
     const { userTempData } = this.state;
     const UID = keyGenerator("UID");
+    let newUserData = {};
     e.preventDefault();
     if (!this.checkErrors()) {
       this.setState((prevState) => ({
-        userSavedData: {
-          ...prevState.userSavedData,
+        // userSavedData
+        userDatabase: {
+          ...prevState.userDatabase,
           [UID]: {},
         },
       }));
 
       Object.keys(userTempData).forEach((val) => {
+        val !== "confirmPassword" && (newUserData[val] = userTempData[val])
+      })
+
+      
         this.setState((prevState) => ({
-          userSavedData: {
-            ...prevState.userSavedData,
+          // userSavedData
+          userDatabase: {
+            ...prevState.userDatabase,
             [UID]: {
-              ...prevState.userSavedData[UID],
-              [val]: userTempData[val],
+              ...newUserData,
             },
           },
         }));
 
-        this.refreshTempData();
-      });
+       
+    
+      this.refreshTempData();
+      
+
+      
     }
   };
+
+
 
   handleButtonLogIn = (e) => {
     e.preventDefault();
     const { email, password } = this.state.userTempData;
     //const { userTempData } = this.state;
     let isLoggedIn = false;
-    let myObject = this.state.userSavedData;
+    // let myObject = this.state.userSavedData;
+    let myObject = this.state.userDatabase;
     if (JSON.stringify(myObject) !== "{}") {
       Object.keys(myObject).forEach((val) => {
         let user = myObject[val];
-        if (user["email"] === email && user["password"] === password) {
+        if ((user["email"]).toLowerCase() === email.toLowerCase() && user["password"] === password) {
           isLoggedIn = true;
-          //alert ('Logged In');
           return;
         }
       });
     }
-    isLoggedIn === true ? this.props.refreshScreen("logInSignUp", "cart", this.props.cart) : alert("wrong")
+    if (isLoggedIn === true) {
+      let myProps = {};
+      myProps["isLoggedIn"] = true;
+      myProps["email"] = email;
+      this.props.refreshScreen("logInSignUp", "cart", myProps)
+    } else {
+      alert("Wrong Email and/or Password")
+    }   
    
   };
 
   handleOptions = ({ target: { value } }) => {
+    document.getElementById("password").type = "password";
+    document.getElementById("hidePasswordIcon").style.visibility = "visible";
+    document.getElementById("showPasswordIcon").style.visibility = "hidden";
     this.setState({ screen: value });
     this.refreshTempData();
-    this.checkErrors();
+    
     
   };
 
@@ -212,7 +238,7 @@ class LogInSignUp extends React.Component {
         break;
 
       case "postCode":
-        errorText = postCodeValidation(value);
+        errorText = onlyNumberValidation(value);
         this.setState((prevState) => ({
           error: { ...prevState.error, [`${type}Error`]: errorText },
         }));
@@ -234,12 +260,13 @@ class LogInSignUp extends React.Component {
 
   handleBlur = ({ target: { name, value } }) => {
     this.handleValidations(name, value);
-    this.checkErrors();
+    // this.checkErrors();
   };
 
-  componentDidMount() {
-    this.checkErrors();
-  }
+  // componentDidMount() {
+  //   this.checkErrors();
+  // }
+
 
   render() {
     const { error } = this.state;
@@ -360,10 +387,12 @@ class LogInSignUp extends React.Component {
           <br /> <br />
           {this.state.screen === "signUp" && (
             <button
+              
               style={{
+                
                 border: "1px solid rgb(162, 159, 159)",
                 borderRadius: "5px",
-                padding: "10px",
+                padding: "5px",
                 lineHeight: "1.2",
                 width: "480px",
                 color: "white",
@@ -371,9 +400,15 @@ class LogInSignUp extends React.Component {
               }}
               onClick={this.handleButton}
             >
-              SIGN UP WITH FACEBOOK
+              
+              <FontAwesomeIcon icon={faFacebook} size="2x" />
+             
+             
             </button>
+              
+            
           )}
+         
         </div>
       </form>
     );

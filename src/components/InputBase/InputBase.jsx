@@ -2,8 +2,13 @@ import React from "react";
 import "./InputBase.css";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { CARD, CARDICON } from "../constants";
 
 const InputBase = ({
+  errorMsgLeft,
+  error,
+  isCard,
+  cardType,
   revealPassword,
   label,
   label2,
@@ -13,11 +18,18 @@ const InputBase = ({
   width,
   gap,
   spanTop,
+  inputLeft,
   left,
   style,
   ...props
 }) => (
-  <label style={{ width: width ? "auto" : "100%", marginBottom: gap ? gap : 0 }}>
+  <label
+    style={{
+      width: width ? width : "100%",
+      marginBottom: gap ? gap : 0,
+      marginLeft: left ? left : null,
+    }}
+  >
     {myName === "password" && (
       <span className="icon" onClick={revealPassword}>
         <FontAwesomeIcon
@@ -50,7 +62,7 @@ const InputBase = ({
       <span
         className="error"
         style={{
-          width: width ? width : "auto",
+          width: width ? "100%" : "auto",
           position: "absolute",
           right: 0,
           top: spanTop && spanTop,
@@ -63,15 +75,28 @@ const InputBase = ({
     <input
       className="input-root"
       style={{
-
-        left: left ? left : null,
+        left: inputLeft ? inputLeft : null,
         width: width ? width : "100%",
         border: errorM && errorM !== "Required" && "1px solid red",
         backgroundColor: errorM && errorM !== "Required" && "#fae2e3",
-        ...style
+        ...style,
       }}
       {...props}
     />
+
+    {(!error || !error.cardError) && isCard && CARD.includes(cardType) && (
+      <img
+        style={{
+          position: "absolute",
+          top: "3px",
+          right: "20px",
+          width: "50px",
+          height: "33px",
+        }}
+        src={CARDICON[cardType]}
+        alt="card"
+      />
+    )}
     {label2 && (
       <div style={{ marginBottom: "20px" }}>
         <div className="label">{label2}</div>

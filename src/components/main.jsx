@@ -2,6 +2,8 @@ import React from "react";
 import LogInSignUp from "./screens/LogInSignUp/LogInSignUp";
 import Shipping from "./screens/Shipping/Shipping";
 import Cart from "./screens/Cart/Cart";
+import Payment from "./screens/Payment/Payment";
+import Confirmation from "./screens/Confirmation/Confirmation";
 
 class Main extends React.Component {
   constructor() {
@@ -9,15 +11,13 @@ class Main extends React.Component {
     this.state = {
       screens: {
         logInSignUp: true,
-        cart: false,
-        shipping: false,
+       
       },
-      user: {
-        userName: "",
-        password: "",
-      },
-      currentScreenProps: "",
-
+      userDatabase: {
+        noel:
+        {email: "noel@gmail.com", password: "noelnoel"}},
+      isLoggedIn: false,
+      email: "",
       cart: {
         orders: {
           order1: {
@@ -43,16 +43,35 @@ class Main extends React.Component {
           order3: {
             product: {
               name: "Yeah! Code",
-              image: "product1.png",
+              image: "product3.png",
             },
             price: "6.00",
             quantity: "4",
             total: "24.00",
           },
         }
+      },
+      shippingData: {
+        address: "",
+        addressTitle: "",
+        nameSurname: "",
+        zipCode: "",
+        country: "US",
+        city: "SF",
+        state: "CA",
+        cellAreaCode: "",
+        cellNumbers: "",
+        telAreaCode: "",
+        telNumbers: "",
+        shipmentMethod: "STANDARD",
+        shipmentMethodDesc: "Delivery in 4-6 working days"
       }
+      
+      
     };
   }
+
+ 
 
 
   refreshState = (unMount, mount, props) => {
@@ -62,7 +81,8 @@ class Main extends React.Component {
         [unMount]: false,
         [mount]: true,
       },
-      cart: props,
+       ...props
+      
     });
   };
 
@@ -73,7 +93,7 @@ class Main extends React.Component {
           {this.state.screens["logInSignUp"] ? (
             <LogInSignUp 
             refreshScreen={this.refreshState}
-            cart={this.state.cart}
+            userDatabase={this.state.userDatabase}
             />
           ) : null}
           {this.state.screens["cart"] ? (
@@ -85,8 +105,30 @@ class Main extends React.Component {
           {this.state.screens["shipping"] ? (
             <Shipping
               refreshScreen={this.refreshState}
+              shippingData = {this.state.shippingData}
               cart={this.state.cart}
             />
+           
+          ) : null}
+           {this.state.screens["payment"] ? (
+            <Payment
+              refreshScreen={this.refreshState}
+              cart={this.state.cart}
+              shippingData = {this.state.shippingData}
+              email = {this.state.email}
+            />
+           
+          ) : null}
+          {this.state.screens["confirmation"] ? (
+            <Confirmation
+              refreshScreen={this.refreshState}
+              cart={this.state.cart}
+              shippingData = {this.state.shippingData}
+              card={this.state.card}
+              email = {this.state.email}
+
+            />
+           
           ) : null}
         </div>
       </div>
