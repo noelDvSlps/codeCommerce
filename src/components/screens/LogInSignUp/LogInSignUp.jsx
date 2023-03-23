@@ -1,7 +1,8 @@
 import React from "react";
-import "../../../../src/index.css"
+import "../../../../src/index.css";
 import InputBase from "../../InputBase/InputBase";
-import styles from "./LogInSignUp.module.css";
+//import styles from "./LogInSignUp.module.css";
+import "../LogInSignUp/LogInSignUp.css";
 import {
   ValidateEmail,
   onlyTextValidation,
@@ -10,19 +11,16 @@ import {
   onlyNumberValidation,
 } from "../../validations";
 
-import {
- keyGenerator
-} from "../../keyGenerator";
+import { keyGenerator } from "../../keyGenerator";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faFacebook} from "@fortawesome/free-brands-svg-icons"
-
+import { faFacebook } from "@fortawesome/free-brands-svg-icons";
 
 class LogInSignUp extends React.Component {
   constructor(props) {
     super();
     this.state = {
-      screen: "signUp",
+      screen: "signIn",
       error: {},
       userTempData: {
         email: "",
@@ -36,8 +34,6 @@ class LogInSignUp extends React.Component {
     };
   }
 
-
- 
   refreshTempData = () => {
     this.setState({
       error: {},
@@ -55,14 +51,8 @@ class LogInSignUp extends React.Component {
     );
   };
 
- 
-
-
   revealPassword = (e) => {
     e.preventDefault();
-    
- 
-    
     if (document.getElementById("password").getAttribute("type") === "text") {
       document.getElementById("password").type = "password";
       document.getElementById("hidePasswordIcon").style.visibility = "visible";
@@ -72,7 +62,6 @@ class LogInSignUp extends React.Component {
       document.getElementById("hidePasswordIcon").style.visibility = "hidden";
       document.getElementById("showPasswordIcon").style.visibility = "visible";
     }
-   
   };
 
   checkErrors = () => {
@@ -99,16 +88,15 @@ class LogInSignUp extends React.Component {
     return isError;
   };
 
- 
   searchIfEmailExists = (email) => {
     let isEmailExist = false;
     // let myObject = this.state.userSavedData;
     let myObject = this.state.userDatabase;
-    
+
     if (JSON.stringify(myObject) !== "{}") {
       Object.keys(myObject).forEach((val) => {
         let user = myObject[val];
-        if ((user["email"]).toLowerCase() === email.toLowerCase()) {
+        if (user["email"].toLowerCase() === email.toLowerCase()) {
           isEmailExist = true;
         }
       });
@@ -131,42 +119,35 @@ class LogInSignUp extends React.Component {
       }));
 
       Object.keys(userTempData).forEach((val) => {
-        val !== "confirmPassword" && (newUserData[val] = userTempData[val])
-      })
+        val !== "confirmPassword" && (newUserData[val] = userTempData[val]);
+      });
 
-      
-        this.setState((prevState) => ({
-          // userSavedData
-          userDatabase: {
-            ...prevState.userDatabase,
-            [UID]: {
-              ...newUserData,
-            },
+      this.setState((prevState) => ({
+        userDatabase: {
+          ...prevState.userDatabase,
+          [UID]: {
+            ...newUserData,
           },
-        }));
+        },
+      }));
 
-       
-    
       this.refreshTempData();
-      
-
-      
+      this.animationButton("notification")
     }
   };
-
-
 
   handleButtonLogIn = (e) => {
     e.preventDefault();
     const { email, password } = this.state.userTempData;
-    //const { userTempData } = this.state;
     let isLoggedIn = false;
-    // let myObject = this.state.userSavedData;
     let myObject = this.state.userDatabase;
     if (JSON.stringify(myObject) !== "{}") {
       Object.keys(myObject).forEach((val) => {
         let user = myObject[val];
-        if ((user["email"]).toLowerCase() === email.toLowerCase() && user["password"] === password) {
+        if (
+          user["email"].toLowerCase() === email.toLowerCase() &&
+          user["password"] === password
+        ) {
           isLoggedIn = true;
           return;
         }
@@ -176,11 +157,13 @@ class LogInSignUp extends React.Component {
       let myProps = {};
       myProps["isLoggedIn"] = true;
       myProps["email"] = email;
-      this.props.refreshScreen("logInSignUp", "cart", myProps)
+      this.props.cartQty > 0 ?
+      this.props.refreshScreen({...this.props.screensInitialStatus, cart: true, navBar: true, },null, myProps)
+      :
+      this.props.refreshScreen({...this.props.screensInitialStatus, products: true, navBar: true, categories: true},null, myProps);
     } else {
-      alert("Wrong Email and/or Password")
-    }   
-   
+      alert("Wrong Email and/or Password");
+    }
   };
 
   handleOptions = ({ target: { value } }) => {
@@ -189,21 +172,20 @@ class LogInSignUp extends React.Component {
     document.getElementById("showPasswordIcon").style.visibility = "hidden";
     this.setState({ screen: value });
     this.refreshTempData();
-    
-    
   };
 
-  makeLabel = (lbl) => {
-    return <label className={styles.label}>{lbl}</label>;
-  };
+ 
 
   handleValidations = (type, value) => {
     let errorText;
 
     switch (type) {
       case "email":
-        errorText = ValidateEmail(value) + 
-        (this.state.screen === "signUp" ? this.searchIfEmailExists(value) : "");
+        errorText =
+          ValidateEmail(value) +
+          (this.state.screen === "signUp"
+            ? this.searchIfEmailExists(value)
+            : "");
 
         this.setState((prevState) => ({
           error: { ...prevState.error, emailError: errorText },
@@ -260,17 +242,19 @@ class LogInSignUp extends React.Component {
 
   handleBlur = ({ target: { name, value } }) => {
     this.handleValidations(name, value);
-    // this.checkErrors();
   };
 
-  // componentDidMount() {
-  //   this.checkErrors();
-  // }
-
+  animationButton = (id) => {
+    
+    const notification = document.getElementById(id);
+    notification.classList.add("showElement");
+    setTimeout(() => {
+    notification.classList.remove("showElement");
+  }, 1000);
+  }
 
   render() {
     const { error } = this.state;
-
     let inputData = [
       {
         label: "Email Address *",
@@ -316,30 +300,29 @@ class LogInSignUp extends React.Component {
     ];
 
     inputData =
-      this.state.screen === "signUp"
-        ? inputData
-        : [
-           inputData[0],
-           inputData[1]
-          ];
-          
+      this.state.screen === "signUp" ? inputData : [inputData[0], inputData[1]];
 
     return (
-      <form className={styles.form}>
-        <div></div>
-        <div className={styles.leftAlign}>
-          <label className={styles.label}>
+      <form className={"form"}>
+        <div className={"notification"} id = "notification">
+          <div style={{color: "gray", fontWeight: "600px", fontSize: "2rem"}}>
+            You are registered!
+          </div>
+        </div>
+        <div className={"leftAlign"}>
+          <label className={"radio-style"}>
             <input
               type="radio"
               name="options"
               value="signUp"
-              defaultChecked
+             
               onChange={this.handleOptions}
             />
             Sign Up
           </label>
-          <label style={{ marginLeft: "100px" }} className={styles.label}>
+          <label style={{ marginLeft: "100px" }} className={"radio-style"}>
             <input
+             defaultChecked
               type="radio"
               name="options"
               onChange={this.handleOptions}
@@ -375,7 +358,7 @@ class LogInSignUp extends React.Component {
         <div>
           <br />
           <button
-           className="btn"
+            className="btn"
             onClick={
               this.state.screen === "signUp"
                 ? this.handleButtonSignUp
@@ -387,9 +370,7 @@ class LogInSignUp extends React.Component {
           <br /> <br />
           {this.state.screen === "signUp" && (
             <button
-              
               style={{
-                
                 border: "1px solid rgb(162, 159, 159)",
                 borderRadius: "5px",
                 padding: "5px",
@@ -400,21 +381,13 @@ class LogInSignUp extends React.Component {
               }}
               onClick={this.handleButton}
             >
-              
               <FontAwesomeIcon icon={faFacebook} size="2x" />
-             
-             
             </button>
-              
-            
           )}
-         
         </div>
       </form>
     );
   }
-
-  
 }
 
 export default LogInSignUp;

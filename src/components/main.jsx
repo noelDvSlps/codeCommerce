@@ -4,132 +4,415 @@ import Shipping from "./screens/Shipping/Shipping";
 import Cart from "./screens/Cart/Cart";
 import Payment from "./screens/Payment/Payment";
 import Confirmation from "./screens/Confirmation/Confirmation";
+import NavBar from "./NavBar/NavBar";
+import Products from "./screens/Products/Products";
+import Categories from "./Categories";
+import ProductDetails from "./screens/ProductDetails/ProductDetail";
+import { COMMERCE_API, COMMERCE_URL } from "./constants2";
 
 class Main extends React.Component {
   constructor() {
     super();
     this.state = {
+      search: {
+        searching: false,
+        searchText: "",
+      },
+      data: [],
+      category: "All Products",
+      loading: false,
+      error: false,
+      errorNumber: "",
       screens: {
-        logInSignUp: true,
-       
+        products: true,
+        navBar: true,
+        categories: true,
       },
       userDatabase: {
-        noel:
-        {email: "noel@gmail.com", password: "noelnoel"}},
+        noel: { email: "noel@gmail.com", password: "noelnoel" },
+      },
       isLoggedIn: false,
       email: "",
       cart: {
-        orders: {
-          order1: {
-            product: {
-              name: "Amazing Code",
-              image: "product1.png",
-            },
-            price: "10.00",
-            quantity: "2",
-            total: "20.00",
-          },
-
-          order2: {
-            product: {
-              name: "Awesome Code",
-              image: "product2.png",
-            },
-            price: "4.00",
-            quantity: "4",
-            total: "16.00",
-          },
-
-          order3: {
-            product: {
-              name: "Yeah! Code",
-              image: "product3.png",
-            },
-            price: "6.00",
-            quantity: "4",
-            total: "24.00",
-          },
-        }
+        orders: {},
+        cartQty: 0,
       },
       shippingData: {
         address: "",
         addressTitle: "",
         nameSurname: "",
         zipCode: "",
-        country: "US",
-        city: "SF",
-        state: "CA",
+        country: "",
+        city: "",
+        state: "",
         cellAreaCode: "",
         cellNumbers: "",
         telAreaCode: "",
         telNumbers: "",
-        shipmentMethod: "STANDARD",
-        shipmentMethodDesc: "Delivery in 4-6 working days"
-      }
-      
-      
+        shipmentMethod: "",
+        shipmentMethodDesc: "",
+      },
+
+      screensInitialStatus: {
+        logInSignUp: false,
+        navBar: false,
+        categories: false,
+        products: false,
+        productDetails: false,
+        cart: false,
+        shipping: false,
+        payment: false,
+        confirmation: false,
+      },
     };
   }
 
- 
-
-
-  refreshState = (unMount, mount, props) => {
+  reset = () => {
     this.setState({
-      screens: {
-        ...this.state.screens,
-        [unMount]: false,
-        [mount]: true,
+      cart: {
+        cartQty: 0,
+        orders: {},
       },
-       ...props
-      
+      shippingData: {
+        address: "",
+        addressTitle: "",
+        nameSurname: "",
+        zipCode: "",
+        country: "",
+        city: "",
+        state: "",
+        cellAreaCode: "",
+        cellNumbers: "",
+        telAreaCode: "",
+        telNumbers: "",
+        shipmentMethod: "",
+        shipmentMethodDesc: "",
+      },
+      search: {
+        searching: false,
+        searchText: "",
+      },
     });
   };
+
+  updateDBInventoryAfterPayment = () => {
+    const data = this.state.data;
+    const cart = this.state.cart.orders;
+    const res = Object.entries(cart).map(([name, obj]) => ({ name, ...obj }));
+    data.map((item) => {
+      for (let i = 0; i < res.length; i++) {
+        if (item.id === res[i].id) {
+          item.inventory = res[i].inventory;
+          break;
+        }
+      }
+      return item;
+    });
+    
+
+    const newData2 = res.map((item) => {
+      const x = data.map((record) => {
+        if (item.id === record.id) {
+          record.inventory = item.inventory;
+        }
+        return record;
+      });
+      return x;
+    });
+
+    this.setState({
+      data: newData2[0],
+    });
+  };
+
+  //use too toggle screens and pass data
+  refreshState = (screens, cart, mainProps) => {
+    this.setState((prevState) => ({
+      ...prevState,
+      screens: {
+        ...this.state.screens,
+        ...screens,
+      },
+      cart: {
+        ...prevState.cart,
+        ...cart,
+      },
+      ...mainProps,
+    }));
+  };
+
+  // use for the search textbox
+  searchProduct = (e) => {
+     this.state.data.filter((item) =>
+      item.title.toUpperCase().includes(e.target.value.toUpperCase())
+    );
+    
+  };
+
+  // use to ignore search textbox when sorting by category
+  ignoreSearch = () => {
+    this.setState((prevState) => ({
+      search: {
+        ...prevState.search,
+        searching: false,
+      },
+    }));
+  };
+
+  // use to enable search text box for searching
+  updateSearchText = (e) => {
+    this.setState({
+      search: {
+        searching: true,
+        searchText: e.target.value.toUpperCase(),
+      },
+    });
+  };
+
+  // update inventory
+
+  // sets what category to show
+  refreshCategory = (category) => {
+    this.setState((prevState) => ({
+      category: category,
+      search: {
+        ...prevState.search,
+        searching: false,
+      },
+    }));
+  };
+
+  updateCartQty = (newQty, orders) => {
+    this.setState((prevState) => ({
+      cart: {
+        cartQty: Number(newQty),
+        orders: orders,
+      },
+    }));
+  };
+
+  showProductDetails = (id , maxValue) => {
+    this.setProductDetails(1);
+    this.refreshState(
+      {
+        ...this.state.screensInitialStatus,
+        navBar: true,
+        productDetails: true,
+      },
+      null,
+      { productDetailsId: id, maxValue: maxValue }
+    );
+  };
+
+  setProductDetails = (qty) => {
+    this.setState({ productDetailsQty: qty });
+  };
+
+  addToCart = (id, qty) => {
+    let items = this.state.data.filter((item) => {
+      return item.id === id;
+    });
+
+    const cartOrders =
+      this.state.cart.orders[id] !== undefined
+        ? this.state.cart.orders[id]
+        : {};
+    const isInCart = id in this.state.cart.orders;
+    const prevQty = isInCart ? this.state.cart.orders[id].quantity : 0;
+    const prevCartQty = Number(this.state.cart.cartQty);
+    const { title, img, price, price_formatted } = items[0];
+    const { inventory } =
+      this.state.cart.orders[id] !== undefined ? cartOrders : items[0];
+    qty = qty !== undefined ? qty : 1;
+
+    const isInventoryEnough = inventory >= qty ? true : false;
+   
+    if (isInventoryEnough) {
+      this.setState((prevState) => ({
+        cart: {
+          orders: {
+            ...prevState.cart.orders,
+            [id]: {
+              id: id,
+              name: title,
+              image: img,
+              price: price,
+              price_formatted: price_formatted,
+              quantity: qty + prevQty,
+              total: price * (qty + prevQty),
+              inventory: inventory - parseInt(qty),
+            },
+          },
+          cartQty: prevCartQty + qty,
+        },
+      }));
+    } else {
+      alert("Not enough inventory");
+    }
+  };
+
+  async componentDidMount(url2 = COMMERCE_URL) {
+    this.setState({ loading: true });
+    const url = new URL(url2);
+    const headers = {
+      "X-Authorization": COMMERCE_API,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: headers,
+    });
+
+    if (response.ok) {
+      const json = await response.json();
+      const data = json.data.map((item) => ({
+        img: item.image.url,
+        title: item.name,
+        price: item.price.raw,
+        id: item.id,
+        price_formatted: item.price.formatted_with_symbol,
+        category: item.categories[0].name,
+        description: item.description,
+        inventory: item.inventory.available,
+      }));
+
+      this.setState({
+        data: [...this.state.data, ...data],
+        loading: false,
+        error: false,
+        errorNumber: 0,
+      });
+     
+      if (json.meta.pagination.links.next !== undefined) {
+        this.componentDidMount(json.meta.pagination.links.next);
+      }
+    } else {
+      this.setState({
+        loading: false,
+        error: true,
+        errorNumber: response.status,
+        data: [],
+      });
+    }
+  }
 
   render() {
     return (
       <div className="containerMax">
         <div className="container">
-          {this.state.screens["logInSignUp"] ? (
-            <LogInSignUp 
-            refreshScreen={this.refreshState}
-            userDatabase={this.state.userDatabase}
+          {this.state.screens["navBar"] ? (
+            <NavBar
+              reset={this.reset}
+              isPaid={this.state.screens.confirmation}
+              refreshScreen={this.refreshState}
+              cartQty={this.state.cart.cartQty}
+              isLoggedIn={this.state.isLoggedIn}
+              email={this.state.email}
+              screensInitialStatus={this.state.screensInitialStatus}
             />
           ) : null}
-          {this.state.screens["cart"] ? (
-            <Cart
-              refreshScreen={this.refreshState}
-              cart={this.state.cart}
-            />
-          ) : null}
-          {this.state.screens["shipping"] ? (
-            <Shipping
-              refreshScreen={this.refreshState}
-              shippingData = {this.state.shippingData}
-              cart={this.state.cart}
-            />
-           
-          ) : null}
-           {this.state.screens["payment"] ? (
-            <Payment
-              refreshScreen={this.refreshState}
-              cart={this.state.cart}
-              shippingData = {this.state.shippingData}
-              email = {this.state.email}
-            />
-           
-          ) : null}
-          {this.state.screens["confirmation"] ? (
-            <Confirmation
-              refreshScreen={this.refreshState}
-              cart={this.state.cart}
-              shippingData = {this.state.shippingData}
-              card={this.state.card}
-              email = {this.state.email}
 
-            />
-           
-          ) : null}
+          <div style={{ marginTop: "100px" }}>
+            {this.state.screens["logInSignUp"] ? (
+              <LogInSignUp
+                cartQty={this.state.cart.cartQty}
+                refreshScreen={this.refreshState}
+                userDatabase={this.state.userDatabase}
+                screensInitialStatus={this.state.screensInitialStatus}
+              />
+            ) : null}
+
+            {this.state.screens["categories"] ? (
+              <Categories
+                refreshCategory={this.refreshCategory}
+                updateSearchText={this.updateSearchText}
+                ignoreSearch={this.ignoreSearch}
+                screensInitialStatus={this.state.screensInitialStatus}
+              />
+            ) : null}
+
+            {this.state.screens["products"] ? (
+              <Products
+              showProductDetails = {this.showProductDetails}
+                setProductDetails={this.setProductDetails}
+                cartOrders={this.state.cart.orders}
+                refreshScreen={this.refreshState}
+                data={this.state.data}
+                category={this.state.category}
+                addToCart={this.addToCart}
+                loading={this.state.loading}
+                search={this.state.search}
+                screensInitialStatus={this.state.screensInitialStatus}
+              />
+            ) : null}
+
+            {this.state.screens["productDetails"] ? (
+              <ProductDetails
+              screens={this.state.screens}
+                productDetailsQty = {this.state.productDetailsQty}
+                setProductDetails={this.setProductDetails}
+                qty={
+                  this.state.productDetailsQty
+                    ? this.state.productDetailsQty
+                    : 1
+                }
+                maxValue={this.state.maxValue}
+                refreshScreen={this.refreshState}
+                id={this.state.productDetailsId}
+                data={this.state.data}
+                addToCart={this.addToCart}
+                screensInitialStatus={this.state.screensInitialStatus}
+              />
+            ) : null}
+
+            {this.state.screens["cart"] ? (
+              <Cart
+              showProductDetails = {this.showProductDetails}
+                screens={this.state.screens}
+                addToCart={this.addToCart}
+                refreshScreen={this.refreshState}
+                updateCartQty={this.updateCartQty}
+                orders={this.state.cart.orders}
+                isLoggedIn={this.state.isLoggedIn}
+                screensInitialStatus={this.state.screensInitialStatus}
+              />
+            ) : null}
+
+            {this.state.screens["shipping"] ? (
+              <Shipping
+                screens={this.state.screens}
+                refreshScreen={this.refreshState}
+                shippingData={this.state.shippingData}
+                cart={this.state.cart}
+                screensInitialStatus={this.state.screensInitialStatus}
+              />
+            ) : null}
+            {this.state.screens["payment"] ? (
+              <Payment
+                screens={this.state.screens}
+                updateDB={this.updateDBInventoryAfterPayment}
+                refreshScreen={this.refreshState}
+                cart={this.state.cart}
+                shippingData={this.state.shippingData}
+                email={this.state.email}
+                screensInitialStatus={this.state.screensInitialStatus}
+              />
+            ) : null}
+            {this.state.screens["confirmation"] ? (
+              <Confirmation
+                screens={this.state.screens}
+                reset={this.reset}
+                refreshScreen={this.refreshState}
+                cart={this.state.cart}
+                shippingData={this.state.shippingData}
+                card={this.state.card}
+                email={this.state.email}
+                screensInitialStatus={this.state.screensInitialStatus}
+              />
+            ) : null}
+          </div>
         </div>
       </div>
     );

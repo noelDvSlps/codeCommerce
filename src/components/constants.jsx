@@ -4,6 +4,8 @@ import AMERICAN_EXPRESS_ICON from '../components/assets/cards/amex.png'
 import MASTER_CARD_ICON from '../components/assets/cards/mastercard.png'
 import DISCOVER_ICON from '../components/assets/cards/discover.png'
 
+
+
 export const OTHERCARDS = [
     /[1-9]/,
     /\d/,
@@ -61,10 +63,3 @@ export const CARDICON = {
 
 }
 
-// export const SCREENS = {
-//   logInSignUp: "loanSignUp",
-//   cart: "cart",
-// //   shipping: <Shipping key={3}/>,
-// //   payment: "payment",
-// //   confirmation: "confirmation",
-// };

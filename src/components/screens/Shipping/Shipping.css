@@ -5,6 +5,12 @@ span{
     position:sticky;
 }
 
+.phone-numbers {
+    display: grid;
+    grid-auto-flow: column;
+    justify-content: left;
+}
+
 .select-shipment{
     border: 1px solid rgb(162, 159, 159);
     border-radius: 5px;
@@ -14,19 +20,17 @@ span{
 }
 
 .shippingForm{
-    padding: 25px;
-    height: auto;
-    min-height: 80vh;
+    display: grid;
+    grid-template-columns: minmax(750px, 800px) minmax(250px, 300px);
     font-size: 1rem;
-    display: flex;
-    height: 100%;
-    gap: 20px;
+    column-gap: 25px;
+    padding: 10px;
     
 }
 
 .shipping-info,
 .summary {
-   
+    
     padding: 25px;
     box-shadow: 1px 1px 10px 0.25px lightgrey;
     border-radius: 8px;
@@ -34,13 +38,7 @@ span{
     height: auto;
 }
 
-.summary {
-    flex: 25%;
-}
-.shipping-info
-{
-    flex: 75%;
-}
+
 
 .shipping-info-wrapper{
     margin-top: 25px;
@@ -74,3 +72,4 @@ span{
     top: 80%;
     right: 0;
 }
+

@@ -1,16 +1,14 @@
 import React from "react";
 import "./Cart.css";
-
 import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-import { keyGenerator } from "../../keyGenerator";
-
+import OrderCounter from "../../OrderCounter";
+import Summary from "../../Summary";
 class Cart extends React.Component {
   constructor(props) {
     super();
     this.state = {
-      cart: props.cart,
+      orders: props.orders,
     };
   }
 
@@ -26,28 +24,44 @@ class Cart extends React.Component {
     e.preventDefault();
     this.setState(
       (prevState) => ({
-        cart: { ...prevState.cart, discount: "4.50" },
+        discount: "4.50",
       }),
       this.handleTotalPrice
     );
   };
 
-  handleInputData = ({ target: { name, id } }) => {
-   
-    const value = document.getElementById(id).value;
-    
-    const tempCart = this.state.cart["orders"];
+  handleInputData2 = (myEl) => {
+    const { value, name } = myEl;
+    const tempCart = this.state["orders"];
+    const tempObj = tempCart[name];
+    const inventoryQty =
+      tempObj["inventory"] - parseInt(Number(value) - tempObj["quantity"]);
+    const orderQty = Number(value);
+    if (inventoryQty > -1 && orderQty > -1) {
+      tempObj["inventory"] = inventoryQty;
+      tempObj["quantity"] = orderQty;
+      const newPrice = this.formatTwoDecimals(Number(value) * tempObj["price"]);
+      tempObj["total"] = newPrice;
+      this.setState((prevState) => ({
+        orders: {
+          ...prevState.orders,
+          [name]: tempObj,
+        },
+      }));
+      this.handleTotalPrice();
+    }
+  };
+
+  handleInputData = ({ target: { name, id, value } }) => {
+    const tempCart = this.state.orders;
     const tempObj = tempCart[name];
     tempObj["quantity"] = Number(value);
     const newPrice = this.formatTwoDecimals(Number(value) * tempObj["price"]);
     tempObj["total"] = newPrice;
     this.setState((prevState) => ({
-      cart: {
-        ...prevState.cart,
-        orders: {
-          ...prevState.cart["orders"],
-          [name]: tempObj,
-        },
+      orders: {
+        ...prevState.orders,
+        [name]: tempObj,
       },
     }));
     this.handleTotalPrice();
@@ -57,64 +71,98 @@ class Cart extends React.Component {
     const subTotal = this.getSubtotal();
     const total = this.formatTwoDecimals(this.getTotal(subTotal));
     this.setState((prevState) => ({
-      cart: {
-        ...prevState.cart,
-        cartSubtotal:  subTotal,
-        cartTotal: total,
-      },
+      cartSubtotal: subTotal,
+      cartTotal: total,
     }));
   };
 
   getSubtotal = () => {
-    const cart = this.state.cart["orders"];
+    const cart = this.state.orders;
     const orders = Object.keys(cart);
-   
-    let tempPrice = 0;
-    orders.map((order) => {
-      Object.keys(cart[order]).map((val) => {
-        if (val === "total") {
-          tempPrice += Number(cart[order][val]);
-        }
-      });
-    });
-    return this.formatTwoDecimals(tempPrice);
+    let subTotal = orders
+      .map((order) => Number(cart[order]["total"]))
+      .reduce((tempPrice, value) => tempPrice + value);
+    return this.formatTwoDecimals(subTotal);
+  };
+
+  getcartQty = (myCart) => {
+    const cart = myCart;
+    try {
+      const orders = Object.keys(cart);
+      let subTotal = orders
+        .map((order) => Number(cart[order]["quantity"]))
+        .reduce((initial, qty) => initial + qty);
+      return subTotal;
+    } catch {
+      return 0;
+    }
   };
 
   getTotal = (subTotal) => {
-    const discount = this.state.cart["discount"]
-      ? this.state.cart["discount"]
-      : 0;
-    const shipping = this.state.cart["shipping"]
-      ? this.state.cart["shipping"]
-      : 0;
+    const discount = this.state.discount ? this.state.discount : 0;
+    const shipping = this.state.shipping ? this.state.shipping : 0;
     return Number(subTotal) - Number(discount) + Number(shipping);
   };
 
-  handleClose = (e) => {
-    let elName = e.currentTarget.attributes.getNamedItem("name").value;
-    const myObj = this.state.cart["orders"];
+  handleClose = (e, value) => {
+    let elName =
+      value === undefined
+        ? e.currentTarget.attributes.getNamedItem("name").value
+        : value;
+    console.log(e, value);
+    const myObj = this.state.orders;
     const updatedCart = Object.keys(myObj)
       .filter((key) => key !== elName)
       .reduce((obj, key) => {
         return Object.assign(obj, {
-          [key]: this.state.cart["orders"][key],
+          [key]: this.state.orders[key],
         });
       }, {});
+
     this.setState(
       (prevState) => ({
-        cart: { ...prevState.cart, orders: updatedCart },
+        orders: updatedCart,
       }),
-      this.handleTotalPrice
+
+      Object.keys(updatedCart).length !== 0
+        ? this.handleTotalPrice
+        : this.props.refreshScreen(
+            {
+              ...this.props.screensInitialStatus,
+              products: true,
+              navBar: true,
+              categories: true,
+            },
+            { orders: {}, cartQty: 0 }
+          )
     );
+    this.props.updateCartQty(this.getcartQty(updatedCart), updatedCart);
+  };
+  showProductDetails = (e) => {
+    this.props.showProductDetails(
+      e.target.title,
+      this.state.orders[e.target.title].inventory
+    );
+    
   };
 
   handleButton = (e) => {
     e.preventDefault();
-    let myProps = {};
-    myProps["cart"] = this.state.cart;
-    myProps["cart"]["cartSubtotal"] = this.state.cart["cartSubtotal"];
 
-    this.props.refreshScreen("cart", "shipping", myProps);
+    if (this.props.isLoggedIn) {
+      let myProps = {};
+      myProps["cart"] = this.state;
+      myProps["cart"]["cartSubtotal"] = this.state.cartSubtotal;
+      this.props.refreshScreen(
+        { ...this.props.screensInitialStatus, shipping: true, navBar: true },
+        { cartSubtotal: this.state.cartSubtotal, discount: this.state.discount }
+      );
+    } else {
+      this.props.refreshScreen(
+        { ...this.props.screensInitialStatus, navBar: true, logInSignUp: true },
+        { cartSubtotal: this.state.cartSubtotal }
+      );
+    }
   };
 
   componentDidMount() {
@@ -125,7 +173,7 @@ class Cart extends React.Component {
 
   render() {
     const items = [];
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 10; i++) {
       items.push(i);
     }
 
@@ -135,25 +183,20 @@ class Cart extends React.Component {
       ["QUANTITY", "20%"],
       ["TOTAL", "20%"],
     ];
-    const cart = this.state.cart["orders"];
-    const orders = Object.keys(cart);
-    const {cartSubtotal, shipping, discount, cartTotal} = this.state.cart
 
-    let cartData = [
-      { label: "Cart Subtotal", value: "$" + cartSubtotal },
-      {label: "Shipping and Handling", value: shipping > 0 ? "+ $" + shipping : "-"},
-      { label: "Discount", value: discount > 0 ? "- $" + discount : "-" },
-      { label: "Cart Total", value: "$" + cartTotal },
-    ];
+    const cart = this.state["orders"];
+    const orders = Object.keys(cart);
+    const { cartSubtotal, shipping, discount, cartTotal } = this.state;
+
     return (
       <form id="cart">
         <div className="cart-wrapper">
-          <div className="table-wrapper">
+          <div name="table-wrapper">
             <table>
-              <thead  >
-              <tr >
-                  {headers.map((item) => (
-                    <th    style={{ width: item[1]}} >
+              <thead>
+                <tr>
+                  {headers.map((item, index) => (
+                    <th key={index} style={{ width: item[1] }}>
                       {item[0]}
                     </th>
                   ))}
@@ -161,11 +204,17 @@ class Cart extends React.Component {
               </thead>
 
               <tbody>
-                {orders.map((order) => (
-                  <tr >
-                    <td  style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                {orders.map((order, index) => (
+                  <tr key={index}>
+                    <td
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}
+                    >
                       <span
-                        className="close-icon"
+                        className="delete-icon"
                         name={order}
                         value={order}
                         onClick={this.handleClose}
@@ -181,45 +230,48 @@ class Cart extends React.Component {
                           icon={faCircleXmark}
                         />
                       </span>
-                      <div  className="img-wrapper">
+                      <div className="img-wrapper">
                         <img
-                          src={require("../../assets/" +
-                            cart[order]["product"]["image"])}
+                          src={cart[order]["image"]}
+                          title={order}
+                          className="cart-product"
+                          onClick={this.showProductDetails}
                           alt=""
                         />
                       </div>
-                      <div >{cart[order]["product"]["name"]}</div>
+                      <div
+                     
+                        title = {order}
+                        className="cart-product"
+                        onClick={this.showProductDetails}
+                      >
+                        {cart[order]["name"]}
+                      </div>
                     </td>
-                    <td >
-                      <div >
+                    <td>
+                      <div>
                         {"$" +
                           this.formatTwoDecimals(Number(cart[order]["price"]))}
                       </div>
-                      </td>
-                      <td >
-                      <select
-                        name={order}
-                        id={keyGenerator(order)}
-                        onChange={this.handleInputData}
-                        //style={{ fontSize: "1.25rem" }}
-                      >
-                        {items.map((v) => (
-                          <option
-                            key={v}
-                            name={order + v}
-                            value={v}
-                            selected={
-                              Number(cart[order]["quantity"]) === v
-                                ? true
-                                : false
-                            }
-                          >
-                            {v}
-                          </option>
-                        ))}
-                      </select>
-                      </td>
-                      <td>
+                    </td>
+                    <td>
+                      <div style={{ textAlign: "center" }}>
+                        <OrderCounter
+                          screens={this.props.screens}
+                          key={order}
+                          addToCart={this.props.addToCart}
+                          id={order}
+                          handleInputData2={this.handleInputData2}
+                          handleClose={this.handleClose}
+                          inputOnChange={this.handleInputData}
+                          inputDefaultValue={cart[order]["quantity"]}
+                          maxValue={
+                            cart[order]["quantity"] + cart[order]["inventory"]
+                          }
+                        />
+                      </div>
+                    </td>
+                    <td>
                       <div>
                         {"$" +
                           this.formatTwoDecimals(Number(cart[order]["total"]))}
@@ -231,59 +283,27 @@ class Cart extends React.Component {
             </table>
           </div>
           <div className="summary-wrapper">
-            <div>
-              <div>SUMMARY</div>
-              <hr />
-              <div>Do you have a promo code?</div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: "10px",
-                  margin: "20px",
-                }}
-              >
-                <input type="text" style={{ width: "125px" }} />
-                <button
-                  onClick={this.handleDiscount}
-                  className="btn"
-                  style={{ backgroundColor: "white", color: "black" }}
-                >
-                  APPLY
-                </button>
-              </div>
-              <hr />
-              {cartData.length
-                ? cartData.map((item) => (
-                    <div
-                   
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        flexDirection: "row",
-                      }}
-                    >
-                      <div>{item.label}</div>
-                      <div>
-                        {item.value === undefined || item.value === null
-                          ? "-"
-                          : item.value}
-                      </div>
-                    </div>
-                  ))
-                : null}
-              <hr />
-            </div>
+            <Summary
+              screens={this.props.screens}
+              cart={cart}
+              cartSubtotal={cartSubtotal}
+              shipping={shipping}
+              discount={discount}
+              cartTotal={cartTotal}
+              handleDiscount={this.handleDiscount}
+            />
             <div>
               <button
                 className={
-                  this.state.cart["cartSubtotal"] === "0.00"
+                  // this.state.cart["cartSubtotal"] === "0.00"
+                  this.state["cartSubtotal"] === "0.00"
                     ? "btn btn-disabled"
                     : "btn"
                 }
                 onClick={this.handleButton}
                 disabled={
-                  this.state.cart["cartSubtotal"] === "0.00" ? true : false
+                  // this.state.cart["cartSubtotal"] === "0.00" ? true : false
+                  this.state["cartSubtotal"] === "0.00" ? true : false
                 }
               >
                 CHECK OUT

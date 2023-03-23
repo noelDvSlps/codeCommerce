@@ -98,7 +98,7 @@ export const passwordValidation = (value) => {
 
 export const alphaNumericValidation = (value) => {
   if (value) {
-    if ((/^[a-zA-Z 0-9]*$/i.test(value)) && value.length > 7 && value.length < 21) {
+    if ((/^[a-zA-Z 0-9]*$/i.test(value)) ) {
       return undefined;
     } else {
       return "Numbers and Letters only";

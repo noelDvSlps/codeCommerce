@@ -1,0 +1,36 @@
+.categories {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333333;
+  }
+
+   
+  
+  
+  .categories-list {
+    float: left;
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 16px;
+    cursor: pointer;
+  }
+
+  .active
+ {   color: tomato;
+    /* background-color: tomato; */
+  }
+
+  
+  
+ 
+  .categories-list:hover {
+    color: tomato;
+    /* background-color: tomato; */
+    
+  }
+
+ 

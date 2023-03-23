@@ -14,14 +14,19 @@ select{
 }
 
 .paymentForm{
-    padding: 25px;
+    /* padding: 25px;
     height: auto;
     min-height: 80vh;
-    /* box-shadow: 1px 1px 9px 0.5px gray;  */
     font-size: 1rem;
     display: flex;
     height: 100%;
-    gap: 20px;
+    gap: 20px; */
+
+    display: grid;
+    grid-template-columns: minmax(750px, 800px) minmax(250px, 300px);
+    font-size: 1rem;
+    column-gap: 25px;
+    padding: 10px;
     
 }
 

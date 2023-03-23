@@ -1,0 +1,23 @@
+.product:hover{
+  text-decoration: underline;
+  cursor: pointer;
+  color: red;
+}
+
+.buttonClicked {
+    animation: buttonClicked 0.25s normal;
+  }
+  
+  @keyframes buttonClicked {
+    0% {
+        background-color: red;
+      color: red;
+      
+      
+    }
+    100% {
+      color: white;
+    
+     
+    }
+  }

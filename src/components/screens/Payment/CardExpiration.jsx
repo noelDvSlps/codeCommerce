@@ -19,9 +19,10 @@ const CardExpiration = ({ errorM, ...props }) => (
   <label name = "test" style={{fontSize: "12px"}}>
    
     <span>Expiration Date:</span>
-    {types.map((type) => (
-      <span style={{marginLeft: "0px"}}>
-        <select name={type} 
+    {types.map((type, index) => (
+      <span  key={index} style={{marginLeft: "-8px"}}>
+        <select 
+        name="expiry" 
         type={type}
         id={type}
         onChange={props.onChange}
@@ -29,7 +30,8 @@ const CardExpiration = ({ errorM, ...props }) => (
         style={{
             border: errorM && "1px solid red",
             backgroundColor: errorM  && "#fae2e3",
-            fontSize: "12px"
+            fontSize: "12px",
+            width: "50px"
         }}
        
         
