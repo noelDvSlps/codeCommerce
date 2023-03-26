@@ -191,19 +191,20 @@ class Cart extends React.Component {
     return (
       <form id="cart">
         <div className="cart-wrapper">
-          <div name="table-wrapper">
+          <div name="table-wrapper" className="table-wrapper">
             <table>
-              <thead>
+             
+
+              <tbody style={{display: "inline"}}>
+              {/* <thead style={{display: "inline"}}> */}
                 <tr>
                   {headers.map((item, index) => (
-                    <th key={index} style={{ width: item[1] }}>
+                    <td key={index} style={{ width: item[1] }}>
                       {item[0]}
-                    </th>
+                    </td>
                   ))}
                 </tr>
-              </thead>
-
-              <tbody>
+              {/* </thead> */}
                 {orders.map((order, index) => (
                   <tr key={index}>
                     <td
@@ -211,6 +212,7 @@ class Cart extends React.Component {
                         display: "flex",
                         flexDirection: "row",
                         alignItems: "center",
+                        justifyContent: "center"
                       }}
                     >
                       <span
@@ -230,6 +232,7 @@ class Cart extends React.Component {
                           icon={faCircleXmark}
                         />
                       </span>
+                      <div>
                       <div className="img-wrapper">
                         <img
                           src={cart[order]["image"]}
@@ -243,9 +246,11 @@ class Cart extends React.Component {
                      
                         title = {order}
                         className="cart-product"
+                        style={{maxWidth: "50px"}}
                         onClick={this.showProductDetails}
                       >
                         {cart[order]["name"]}
+                      </div>
                       </div>
                     </td>
                     <td>
@@ -257,6 +262,7 @@ class Cart extends React.Component {
                     <td>
                       <div style={{ textAlign: "center" }}>
                         <OrderCounter
+                          
                           screens={this.props.screens}
                           key={order}
                           addToCart={this.props.addToCart}
@@ -282,6 +288,7 @@ class Cart extends React.Component {
               </tbody>
             </table>
           </div>
+
           <div className="summary-wrapper">
             <Summary
               screens={this.props.screens}
@@ -295,7 +302,6 @@ class Cart extends React.Component {
             <div>
               <button
                 className={
-                  // this.state.cart["cartSubtotal"] === "0.00"
                   this.state["cartSubtotal"] === "0.00"
                     ? "btn btn-disabled"
                     : "btn"
