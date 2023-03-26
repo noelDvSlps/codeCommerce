@@ -1,0 +1,21 @@
+.product-details{
+   display: grid; 
+   grid-template-columns: repeat(auto-fill, 400px);
+   justify-content: center;
+}
+
+@media screen and (max-width: 768px){
+    .product-details{
+
+        grid-template-columns: repeat(auto-fill, 400px);
+       
+     }
+  }
+
+  @media screen and (max-width: 480px){
+    .product-details{
+
+        grid-template-columns: repeat(auto-fill, 75%);
+       
+     }
+  }

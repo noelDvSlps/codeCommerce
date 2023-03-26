@@ -50,15 +50,10 @@ class ProductCard extends React.Component {
     }
     return (
       <div
-        style={{
-          border: "2px solid gray",
-          width: "200px",
-          display: "inline-block",
-          padding: "10px",
-          margin: "5px",
-        }}
+        id="prod"
+       
       >
-        <div style={{ height: "380px" }}>
+        <div  className = "productCard" style={{ height: "90%" }}>
           <img
             onClick={this.showProductDetails}
             title={id}

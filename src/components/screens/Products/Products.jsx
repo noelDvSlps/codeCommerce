@@ -1,5 +1,6 @@
 import React from "react";
 import ProductCard from "../../ProductCard";
+import "../../ProductCard.css"
 
 class Products extends React.Component {
   constructor(props) {
@@ -27,25 +28,33 @@ class Products extends React.Component {
       );
     }
     return (
-      <div style={{ marginTop: "50px" }}>
-        {!this.props.loading ? (
-          data.map((item) => (
+    
+          <div style={{ marginTop: "50px", }}>
+            {
+            
+            !this.props.loading ? (
+              data.map((item) => (
 
-            <ProductCard
-              showProductDetails = {this.props.showProductDetails}
-              setProductDetails = {this.props.setProductDetails}
-              maxValue = {cartOrders[item.id] === undefined ? item.inventory :cartOrders[item.id].inventory}
-              screensInitialStatus = {this.props.screensInitialStatus}
-              refreshScreen={this.props.refreshScreen}
-              key={item.id}
-              addToCart={this.props.addToCart}
-              item={item}
-            />
-          ))
-        ) : (
-          <div>Loading...</div>
-        )}
-      </div>
+                <ProductCard
+                  showProductDetails = {this.props.showProductDetails}
+                  setProductDetails = {this.props.setProductDetails}
+                  maxValue = {cartOrders[item.id] === undefined ? item.inventory :cartOrders[item.id].inventory}
+                  screensInitialStatus = {this.props.screensInitialStatus}
+                  refreshScreen={this.props.refreshScreen}
+                  key={item.id}
+                  addToCart={this.props.addToCart}
+                  item={item}
+                />
+              ))
+            ) : (
+              <div>Loading...</div>
+            )
+            
+            
+            }
+          </div>
+      
+      
     );
   }
 }

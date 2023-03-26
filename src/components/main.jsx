@@ -9,6 +9,9 @@ import Products from "./screens/Products/Products";
 import Categories from "./Categories";
 import ProductDetails from "./screens/ProductDetails/ProductDetail";
 import { COMMERCE_API, COMMERCE_URL } from "./constants2";
+import CommerceService from "../services";
+
+const commerce = new CommerceService();
 
 class Main extends React.Component {
   constructor() {
@@ -18,9 +21,12 @@ class Main extends React.Component {
         searching: false,
         searchText: "",
       },
+      
       data: [],
+      data2:[],
       category: "All Products",
       loading: false,
+      loading2: [],
       error: false,
       errorNumber: "",
       screens: {
@@ -169,7 +175,6 @@ class Main extends React.Component {
     });
   };
 
-  // update inventory
 
   // sets what category to show
   refreshCategory = (category) => {
@@ -251,54 +256,50 @@ class Main extends React.Component {
     }
   };
 
-  async componentDidMount(url2 = COMMERCE_URL) {
+ 
+  componentDidMount(url= COMMERCE_URL) {
+    
     this.setState({ loading: true });
-    const url = new URL(url2);
-    const headers = {
-      "X-Authorization": COMMERCE_API,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
+    commerce.fetchProductData(url)
+      .then((res) => {
+        if (res && res.response.ok) {
+          console.log(res)
+          this.setState({
+            data: [...this.state.data, ...res.data],
+            data2:[this.state.data, res.data],
+            loading2: [...this.state.loading2, false],
+            loading: false,
+           
+            error: false,
+            pagination: res.pagination,
+            errorNumber: 0,
+          });
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: headers,
-    });
+          if (res.pagination.links.next !== undefined) {
+            this.componentDidMount(res.pagination.links.next);
+            
+            } 
+            
 
-    if (response.ok) {
-      const json = await response.json();
-      const data = json.data.map((item) => ({
-        img: item.image.url,
-        title: item.name,
-        price: item.price.raw,
-        id: item.id,
-        price_formatted: item.price.formatted_with_symbol,
-        category: item.categories[0].name,
-        description: item.description,
-        inventory: item.inventory.available,
-      }));
-
-      this.setState({
-        data: [...this.state.data, ...data],
-        loading: false,
-        error: false,
-        errorNumber: 0,
-      });
-     
-      if (json.meta.pagination.links.next !== undefined) {
-        this.componentDidMount(json.meta.pagination.links.next);
-      }
-    } else {
-      this.setState({
-        loading: false,
-        error: true,
-        errorNumber: response.status,
-        data: [],
-      });
-    }
+        } else {
+          this.setState({
+            loading: false,
+          });
+        }
+      }, (res, error) => {
+        console.log(error);
+        this.setState({
+          loading: false,
+          error: true,
+          errorNumber: res.response.status,
+          data: [],
+        });
+      })
   }
-
+ 
+  
   render() {
+  const data2 = this.state.data2
     return (
       <div className="containerMax">
         <div className="container">
@@ -332,10 +333,11 @@ class Main extends React.Component {
                 screensInitialStatus={this.state.screensInitialStatus}
               />
             ) : null}
-
+        
+           
             {this.state.screens["products"] ? (
               <Products
-              showProductDetails = {this.showProductDetails}
+                showProductDetails = {this.showProductDetails}
                 setProductDetails={this.setProductDetails}
                 cartOrders={this.state.cart.orders}
                 refreshScreen={this.refreshState}

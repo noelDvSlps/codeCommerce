@@ -42,7 +42,7 @@ class NavBar extends React.Component {
           <div className="navbar-container">
             <div className="navbar-brand" onClick={this.goHome} style={{cursor: "pointer"}}>
               Noelistic
-            </div>
+            </div >
             <ul className="navbar-nav">
               <li className="nav-link"
                onClick={this.handleClickCart}
